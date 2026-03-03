@@ -5,12 +5,17 @@ import { redirect } from "next/navigation"
 
 export type AuthState = { error?: string } | null
 
+function field(formData: FormData, name: string): string | null {
+  const v = formData.get(name)
+  return typeof v === "string" ? v : null
+}
+
 export async function login(
   _prev: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
+  const email = field(formData, "email")
+  const password = field(formData, "password")
 
   if (!email || !password) return { error: "Rellena todos los campos." }
 
@@ -26,8 +31,8 @@ export async function register(
   _prev: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
-  const email = formData.get("email") as string
-  const password = formData.get("password") as string
+  const email = field(formData, "email")
+  const password = field(formData, "password")
 
   if (!email || !password) return { error: "Rellena todos los campos." }
   if (password.length < 6)
@@ -37,9 +42,8 @@ export async function register(
   const { data, error } = await supabase.auth.signUp({ email, password })
 
   if (error) return { error: error.message }
-
-  // Si el usuario ya existe, identities estará vacío
-  if (data.user && data.user.identities?.length === 0) {
+  if (!data.user) return { error: "Error al registrarse. Intenta de nuevo." }
+  if (data.user.identities?.length === 0) {
     return { error: "Este correo ya está registrado. Inicia sesión." }
   }
 

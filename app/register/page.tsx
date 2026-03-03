@@ -5,12 +5,15 @@ import Link from "next/link"
 import Image from "next/image"
 import { register } from "@/lib/actions/auth"
 import { SubmitButton } from "@/components/ui/submit-button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 const PANEL_IMAGE =
   "https://images.unsplash.com/photo-1618221469555-7f3ad97540d6?auto=format&fit=crop&w=1200&q=85"
 
 export default function RegisterPage() {
-  const [state, action] = useActionState(register, null)
+  const [state, formAction] = useActionState(register, null)
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -82,39 +85,39 @@ export default function RegisterPage() {
 
           {/* Error */}
           {state?.error && (
-            <div className="border border-red-200 bg-red-50 px-4 py-3 mb-6">
-              <p className="text-sm text-red-700">{state.error}</p>
-            </div>
+            <Alert variant="destructive" className="mb-6 rounded-none">
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
           )}
 
           {/* Form */}
-          <form action={action} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-1.5">
-              <label
+              <Label
                 htmlFor="email"
-                className="text-xs uppercase tracking-[0.15em] text-foreground"
+                className="text-xs uppercase tracking-[0.15em]"
               >
                 Correo electrónico
-              </label>
-              <input
+              </Label>
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
                 placeholder="tu@correo.com"
-                className="w-full border border-border bg-white px-4 h-11 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground transition-colors"
+                className="h-11 rounded-none bg-white focus-visible:ring-0 focus-visible:border-foreground"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label
+              <Label
                 htmlFor="password"
-                className="text-xs uppercase tracking-[0.15em] text-foreground"
+                className="text-xs uppercase tracking-[0.15em]"
               >
                 Contraseña
-              </label>
-              <input
+              </Label>
+              <Input
                 id="password"
                 name="password"
                 type="password"
@@ -122,7 +125,7 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 placeholder="Mínimo 6 caracteres"
-                className="w-full border border-border bg-white px-4 h-11 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground transition-colors"
+                className="h-11 rounded-none bg-white focus-visible:ring-0 focus-visible:border-foreground"
               />
             </div>
 

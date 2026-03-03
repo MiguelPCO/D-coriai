@@ -7,15 +7,21 @@ export async function GET(request: Request) {
   const code = searchParams.get("code")
   const next = searchParams.get("next") ?? "/app"
 
-  if (code) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+  // Prevenir open redirect — solo rutas relativas
+  const safePath = next.startsWith("/") ? next : "/app"
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+  if (code) {
+    try {
+      const supabase = await createClient()
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      if (!error) {
+        return NextResponse.redirect(`${origin}${safePath}`)
+      }
+    } catch {
+      // fall through to error redirect
     }
   }
 
-  // Error: volver al login
-  return NextResponse.redirect(`${origin}/login?error=Enlace+de+confirmación+inválido`)
+  const errorParam = encodeURIComponent("Enlace de confirmación inválido")
+  return NextResponse.redirect(`${origin}/login?error=${errorParam}`)
 }
