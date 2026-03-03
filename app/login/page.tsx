@@ -8,7 +8,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-1">
           <Link href="/" className="font-serif text-2xl font-bold">
-            interior.ai
+            Décoriai
           </Link>
           <p className="text-muted-foreground text-sm">Inicia sesión en tu cuenta</p>
         </div>

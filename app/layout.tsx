@@ -16,11 +16,11 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "interior.ai — Rediseña tu hogar con IA",
+  title: "Décoriai — Rediseña tu hogar con IA",
   description:
     "Sube una foto de tu habitación, elige un estilo y obtén el rediseño en segundos. Powered by AI.",
   openGraph: {
-    title: "interior.ai — Rediseña tu hogar con IA",
+    title: "Décoriai — Rediseña tu hogar con IA",
     description:
       "Sube una foto de tu habitación, elige un estilo y obtén el rediseño en segundos.",
     type: "website",

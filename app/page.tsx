@@ -7,7 +7,7 @@ export default function LandingPage() {
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
       <div className="text-center space-y-6 max-w-xl">
         <h1 className="font-serif text-6xl font-bold tracking-tight text-foreground">
-          interior.ai
+          Décoriai
         </h1>
         <p className="text-lg text-muted-foreground leading-relaxed">
           Rediseña cualquier habitación con inteligencia artificial. Sube una foto,

@@ -30,7 +30,7 @@ export default async function AppLayout({
         {/* Logo */}
         <div className="px-6 py-5 border-b border-border">
           <Link href="/" className="font-serif text-xl font-bold tracking-tight">
-            interior.ai
+            Décoriai
           </Link>
         </div>
 
