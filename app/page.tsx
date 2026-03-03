@@ -1,27 +1,42 @@
+import { Navbar } from "@/components/landing/navbar"
+import { Hero } from "@/components/landing/hero"
+import { HowItWorks } from "@/components/landing/how-it-works"
+import { StylesGrid } from "@/components/landing/styles-grid"
+import { BeforeAfterSection } from "@/components/landing/before-after-section"
+import { CtaSection } from "@/components/landing/cta-section"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
-// Placeholder landing page — será reemplazada en Sprint 1 Días 2-3
 export default function LandingPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6">
-      <div className="text-center space-y-6 max-w-xl">
-        <h1 className="font-serif text-6xl font-bold tracking-tight text-foreground">
-          Décoriai
-        </h1>
-        <p className="text-lg text-muted-foreground leading-relaxed">
-          Rediseña cualquier habitación con inteligencia artificial. Sube una foto,
-          elige tu estilo y obtén el resultado en segundos.
-        </p>
-        <div className="flex gap-3 justify-center pt-2">
-          <Button size="lg" asChild>
-            <Link href="/register">Empieza gratis</Link>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/login">Iniciar sesión</Link>
-          </Button>
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+        <HowItWorks />
+        <StylesGrid />
+        <BeforeAfterSection />
+        <CtaSection />
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-foreground text-background/40 border-t border-background/10">
+        <div className="max-w-7xl mx-auto px-6 md:px-16 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="font-serif text-background/70 font-semibold">
+            Décoriai
+          </span>
+          <p className="text-xs">
+            © {new Date().getFullYear()} Décoriai · Proyecto de portfolio
+          </p>
+          <nav className="flex items-center gap-5 text-xs">
+            <Link href="/login" className="hover:text-background transition-colors">
+              Iniciar sesión
+            </Link>
+            <Link href="/register" className="hover:text-background transition-colors">
+              Registro
+            </Link>
+          </nav>
         </div>
-      </div>
-    </main>
+      </footer>
+    </>
   )
 }
