@@ -18,9 +18,15 @@ export type Database = {
     Tables: {
       generations: {
         Row: Generation
-        Insert: Omit<Generation, "id" | "created_at"> & {
+        Insert: Omit<
+          Generation,
+          "id" | "created_at" | "output_image_url" | "replicate_id" | "error_message"
+        > & {
           id?: string
           created_at?: string
+          output_image_url?: string | null
+          replicate_id?: string | null
+          error_message?: string | null
         }
         Update: Partial<Omit<Generation, "id" | "user_id">>
         Relationships: []
