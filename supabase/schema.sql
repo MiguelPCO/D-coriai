@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS generations (
 -- Row Level Security
 ALTER TABLE generations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "generations: own" ON generations;
 CREATE POLICY "generations: own"
   ON generations
   FOR ALL
@@ -51,6 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_generations_status
 --    (las políticas de storage van en storage.objects)
 
 -- Usuarios autenticados pueden subir a su propia carpeta (user_id/)
+DROP POLICY IF EXISTS "storage: authenticated uploads" ON storage.objects;
 CREATE POLICY "storage: authenticated uploads"
   ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (
@@ -59,11 +61,13 @@ CREATE POLICY "storage: authenticated uploads"
   );
 
 -- Lectura pública de todas las imágenes (bucket es público)
+DROP POLICY IF EXISTS "storage: public reads" ON storage.objects;
 CREATE POLICY "storage: public reads"
   ON storage.objects FOR SELECT TO public
   USING (bucket_id = 'generations');
 
 -- Los usuarios solo pueden borrar sus propias imágenes
+DROP POLICY IF EXISTS "storage: own deletes" ON storage.objects;
 CREATE POLICY "storage: own deletes"
   ON storage.objects FOR DELETE TO authenticated
   USING (
