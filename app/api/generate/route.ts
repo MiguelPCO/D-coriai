@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import Replicate from "replicate"
+import Replicate, { type Prediction } from "replicate"
 import { createClient } from "@/lib/supabase/server"
-import { STYLES } from "@/lib/constants/styles"
+import { STYLES, STYLE_MIXES } from "@/lib/constants/styles"
 
 export async function POST(request: Request) {
   // Validar env vars críticas antes de cualquier cosa
@@ -23,26 +23,31 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as {
-    inputImageUrl?: string
-    style?: string
+    inputImageUrl?: string | null
+    style?: string | null
     prompt?: string
   }
   const { inputImageUrl, style, prompt } = body
 
-  if (!inputImageUrl || !style) {
+  // Al menos estilo o detalles son requeridos en ambos modos
+  if (!style && !prompt?.trim()) {
     return NextResponse.json(
-      { error: "Faltan campos requeridos." },
+      { error: "Selecciona un estilo o añade instrucciones." },
       { status: 400 },
     )
   }
 
-  const styleData = STYLES.find((s) => s.id === style)
-  if (!styleData) {
+  // Lookup de estilo o mezcla
+  const styleData = style ? STYLES.find((s) => s.id === style) : null
+  const mixData = style && !styleData ? STYLE_MIXES.find((m) => m.id === style) : null
+
+  if (style && !styleData && !mixData) {
     return NextResponse.json({ error: "Estilo no válido." }, { status: 400 })
   }
 
-  // Componer el prompt final: boost del estilo + instrucciones del usuario
-  const fullPrompt = [styleData.promptBoost, prompt]
+  // Componer el prompt final
+  const promptBoost = styleData?.promptBoost ?? mixData?.promptBoost
+  const fullPrompt = [promptBoost, prompt?.trim()]
     .filter(Boolean)
     .join(", ")
 
@@ -51,9 +56,9 @@ export async function POST(request: Request) {
     .from("generations")
     .insert({
       user_id: user.id,
-      prompt: fullPrompt,
-      style,
-      input_image_url: inputImageUrl,
+      prompt: fullPrompt || "interior design",
+      style: style ?? null,
+      input_image_url: inputImageUrl ?? null,
       status: "processing",
     })
     .select()
@@ -71,18 +76,42 @@ export async function POST(request: Request) {
   try {
     const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
 
-    const prediction = await replicate.predictions.create({
-      version: "76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38",
-      input: {
-        image: inputImageUrl,
-        prompt: fullPrompt,
-        negative_prompt:
-          "lowres, watermark, banner, logo, text, deformed, blurry, out of focus, surreal, ugly, low quality",
-        num_inference_steps: 30,
-        guidance_scale: 15,
-        prompt_strength: 0.8,
-      },
-    })
+    let prediction: Prediction
+
+    if (inputImageUrl) {
+      // ── Con referencia: adirik/interior-design ────────────────────────────
+      prediction = await replicate.predictions.create({
+        version:
+          "76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38",
+        input: {
+          image: inputImageUrl,
+          prompt: fullPrompt,
+          negative_prompt:
+            "lowres, watermark, banner, logo, text, deformed, blurry, out of focus, surreal, ugly, low quality",
+          num_inference_steps: 30,
+          guidance_scale: 15,
+          prompt_strength: 0.8,
+        },
+      })
+    } else {
+      // ── Sin referencia: flux-schnell (texto a imagen) ─────────────────────
+      const textToImagePrompt = [
+        "interior design photo, high quality, professional photography",
+        fullPrompt,
+      ]
+        .filter(Boolean)
+        .join(", ")
+
+      prediction = await replicate.predictions.create({
+        model: "black-forest-labs/flux-schnell",
+        input: {
+          prompt: textToImagePrompt,
+          aspect_ratio: "4:3",
+          output_format: "webp",
+          output_quality: 90,
+        },
+      })
+    }
 
     // Guardar el replicate_id para poder hacer polling
     await supabase
