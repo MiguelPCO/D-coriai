@@ -81,17 +81,17 @@ export function ImageUploader({
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleDrop}
         className={cn(
-          "flex flex-col items-center justify-center gap-4 min-h-52 border-2 border-dashed transition-colors",
+          "flex flex-col items-center justify-center gap-4 min-h-64 border border-dashed transition-colors",
           disabled
-            ? "opacity-50 cursor-not-allowed border-border"
+            ? "opacity-50 cursor-not-allowed border-border bg-transparent"
             : "cursor-pointer",
           !disabled &&
             (isDragOver
-              ? "border-foreground bg-muted/30"
-              : "border-border hover:border-foreground/60"),
+              ? "border-warm bg-warm/8"
+              : "border-border bg-warm/5 hover:border-foreground/60 hover:bg-warm/10"),
         )}
       >
-        <Upload className="h-7 w-7 text-muted-foreground" />
+        <Upload className="h-6 w-6 text-warm/60" />
         <div className="text-center px-6">
           <p className="text-sm font-medium text-foreground">
             Arrastra tu foto aquí

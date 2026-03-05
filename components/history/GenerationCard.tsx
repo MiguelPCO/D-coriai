@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { type Generation } from "@/types/database"
 import { STYLES } from "@/lib/constants/styles"
 import { deleteGeneration } from "@/lib/actions/generations"
+import { downloadImage } from "@/lib/download"
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider"
 import {
   Dialog,
@@ -49,10 +50,11 @@ interface GenerationCardProps {
 export function GenerationCard({ generation }: GenerationCardProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const styleName =
     STYLES.find((s) => s.id === generation.style)?.name ??
-    (generation.style ?? "")
+    (generation.style ?? "Sin estilo")
   const thumbnailUrl =
     generation.output_image_url ?? generation.input_image_url
   const isCompleted = generation.status === "completed"
@@ -66,12 +68,27 @@ export function GenerationCard({ generation }: GenerationCardProps) {
     })
   }
 
+  async function handleDownload() {
+    if (!generation.output_image_url) return
+    setIsDownloading(true)
+    try {
+      await downloadImage(
+        generation.output_image_url,
+        `diseño-interior-${generation.id}.webp`,
+      )
+    } catch {
+      toast.error("No se pudo descargar la imagen.")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   return (
     <>
       {/* ── Tarjeta ────────────────────────────────────────────────────────── */}
       <div
         className={cn(
-          "relative overflow-hidden break-inside-avoid mb-3 group",
+          "relative overflow-hidden group",
           isCompleted && "cursor-pointer",
         )}
         onClick={() => isCompleted && setOpen(true)}
@@ -95,11 +112,26 @@ export function GenerationCard({ generation }: GenerationCardProps) {
             </div>
           )}
 
-          {/* Overlay "Ver comparativa" — solo en completadas */}
+          {/* Gradient inferior — nombre + tiempo en hover */}
           {isCompleted && (
-            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+          )}
+          {isCompleted && (
+            <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-1 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+              <p className="font-serif italic text-sm font-semibold text-white leading-tight">
+                {styleName}
+              </p>
+              <p className="text-xs text-white/70 mt-0.5">
+                {relativeTime(generation.created_at)}
+              </p>
+            </div>
+          )}
+
+          {/* Overlay central "Ver comparativa" */}
+          {isCompleted && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <span className="text-white text-xs uppercase tracking-widest font-medium">
-                Ver comparativa
+                {generation.input_image_url ? "Ver comparativa" : "Ver diseño"}
               </span>
             </div>
           )}
@@ -134,65 +166,79 @@ export function GenerationCard({ generation }: GenerationCardProps) {
           </button>
         </div>
 
-        {/* Footer de la tarjeta */}
-        <div className="pt-2 pb-1">
-          <p className="font-serif italic text-sm font-semibold text-foreground leading-tight">
-            {styleName}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {relativeTime(generation.created_at)}
-          </p>
-        </div>
+        {/* Footer externo — solo para generaciones NO completadas */}
+        {generation.status !== "completed" && (
+          <div className="pt-2 pb-1">
+            <p className="font-serif italic text-sm font-semibold text-foreground leading-tight">
+              {styleName}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {relativeTime(generation.created_at)}
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* ── Dialog BeforeAfter — solo para generaciones completadas ─────────── */}
-      {isCompleted &&
-        generation.input_image_url &&
-        generation.output_image_url && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="max-w-2xl rounded-none p-0 gap-0 overflow-hidden">
-              <DialogHeader className="px-6 pt-6 pb-4">
-                <DialogTitle className="font-serif italic text-xl font-bold">
-                  Estilo {styleName}
-                </DialogTitle>
-                <p className="text-xs text-muted-foreground">
-                  {relativeTime(generation.created_at)}
-                </p>
-              </DialogHeader>
+      {/* ── Dialog — solo para generaciones completadas ──────────────────── */}
+      {isCompleted && generation.output_image_url && (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-2xl rounded-none p-0 gap-0 overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-4">
+              <DialogTitle className="font-serif italic text-xl font-bold">
+                {styleName !== "Sin estilo" ? `Estilo ${styleName}` : "Tu diseño"}
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground">
+                {relativeTime(generation.created_at)}
+              </p>
+            </DialogHeader>
 
+            {generation.input_image_url ? (
               <BeforeAfterSlider
                 before={generation.input_image_url}
                 after={generation.output_image_url}
                 className="aspect-[4/3] w-full"
               />
+            ) : (
+              <div className="relative aspect-[4/3] w-full">
+                <Image
+                  src={generation.output_image_url}
+                  alt={styleName}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 672px"
+                />
+              </div>
+            )}
 
-              <DialogFooter className="px-6 py-4 border-t border-border flex-row items-center justify-between gap-3">
-                <a
-                  href={generation.output_image_url}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 h-9 px-5 bg-foreground text-background text-xs uppercase tracking-wide hover:bg-foreground/90 transition-colors"
-                >
+            <DialogFooter className="px-6 py-4 border-t border-border flex-row items-center justify-between gap-3">
+              <button
+                onClick={handleDownload}
+                disabled={isDownloading}
+                className="inline-flex items-center gap-2 h-9 px-5 bg-foreground text-background text-xs uppercase tracking-wide hover:bg-foreground/90 transition-colors disabled:opacity-60"
+              >
+                {isDownloading ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
                   <Download className="h-3 w-3" />
-                  Descargar
-                </a>
+                )}
+                {isDownloading ? "Descargando..." : "Descargar"}
+              </button>
 
-                <button
-                  onClick={() => {
-                    setOpen(false)
-                    handleDelete()
-                  }}
-                  disabled={isPending}
-                  className="text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                >
-                  <Trash2 className="h-3 w-3" />
-                  Eliminar
-                </button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+              <button
+                onClick={() => {
+                  setOpen(false)
+                  handleDelete()
+                }}
+                disabled={isPending}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Trash2 className="h-3 w-3" />
+                Eliminar
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   )
 }

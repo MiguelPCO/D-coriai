@@ -26,6 +26,11 @@ export default async function HistoryPage() {
         <div className="flex items-end justify-between gap-4">
           <h1 className="font-serif italic text-4xl font-bold text-foreground leading-tight">
             Tus diseños.
+            {hasGenerations && (
+              <span className="font-sans not-italic text-2xl font-light text-muted-foreground ml-3">
+                ({generations!.length})
+              </span>
+            )}
           </h1>
           {hasGenerations && (
             <Link
@@ -56,9 +61,9 @@ export default async function HistoryPage() {
         </div>
       )}
 
-      {/* Masonry grid */}
+      {/* Grid — orden descendente de izquierda a derecha */}
       {hasGenerations && (
-        <div className="columns-2 md:columns-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {generations.map((generation) => (
             <GenerationCard key={generation.id} generation={generation} />
           ))}

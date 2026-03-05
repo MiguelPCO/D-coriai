@@ -1,21 +1,20 @@
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider"
-import { getUnsplashUrl } from "@/lib/constants/styles"
 
 const EXAMPLES = [
   {
     label: "Salón · Estilo Nórdico",
-    before: getUnsplashUrl("photo-1502672260266-1c1ef2d93688", 900),
-    after: getUnsplashUrl("photo-1555041469-a586c61ea9bc", 900),
+    before: "/images/salonantes.webp",
+    after: "/images/salondespues.webp",
   },
   {
     label: "Dormitorio · Estilo Japandi",
-    before: getUnsplashUrl("photo-1556909114-f6e7ad7d3136", 900),
-    after: getUnsplashUrl("photo-1615873968403-89e068629265", 900),
+    before: "/images/dormitorioantes.jpg",
+    after: "/images/dormitoriodespues.webp",
   },
   {
     label: "Comedor · Estilo Clásico",
-    before: getUnsplashUrl("photo-1484154218962-a197022b5858", 900),
-    after: getUnsplashUrl("photo-1567016376408-0226e4d0c1ea", 900),
+    before: "/images/comedorantes.webp",
+    after: "/images/comedordespues.webp",
   },
 ]
 

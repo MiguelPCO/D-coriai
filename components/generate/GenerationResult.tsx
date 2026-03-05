@@ -1,12 +1,16 @@
 "use client"
 
+import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
-import { Download } from "lucide-react"
+import { Download, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider"
 import { Button } from "@/components/ui/button"
+import { downloadImage } from "@/lib/download"
 
 interface GenerationResultProps {
-  inputImageUrl: string
+  inputImageUrl: string | null
   outputImageUrl: string
   styleName: string
   onReset: () => void
@@ -18,6 +22,19 @@ export function GenerationResult({
   styleName,
   onReset,
 }: GenerationResultProps) {
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  async function handleDownload() {
+    setIsDownloading(true)
+    try {
+      await downloadImage(outputImageUrl, `diseño-interior-${Date.now()}.webp`)
+    } catch {
+      toast.error("No se pudo descargar la imagen.")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -26,32 +43,48 @@ export function GenerationResult({
           Resultado
         </span>
         <h2 className="font-serif italic text-3xl font-bold text-foreground leading-tight">
-          Estilo {styleName}
+          {styleName ? `Estilo ${styleName}` : "Tu diseño"}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Arrastra el deslizador para comparar tu habitación original.
+          {inputImageUrl
+            ? "Arrastra el deslizador para comparar tu habitación original."
+            : "Tu espacio generado por IA."}
         </p>
       </div>
 
-      {/* Before / After slider */}
-      <BeforeAfterSlider
-        before={inputImageUrl}
-        after={outputImageUrl}
-        className="aspect-[4/3] w-full"
-      />
+      {/* Before / After slider o imagen sola */}
+      {inputImageUrl ? (
+        <BeforeAfterSlider
+          before={inputImageUrl}
+          after={outputImageUrl}
+          className="aspect-[4/3] w-full"
+        />
+      ) : (
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <Image
+            src={outputImageUrl}
+            alt={styleName || "Diseño generado"}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 600px"
+          />
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-1">
-        <a
-          href={outputImageUrl}
-          download
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 h-11 px-6 bg-foreground text-background text-xs uppercase tracking-wide hover:bg-foreground/90 transition-colors"
+        <button
+          onClick={handleDownload}
+          disabled={isDownloading}
+          className="inline-flex items-center gap-2 h-11 px-6 bg-foreground text-background text-xs uppercase tracking-wide hover:bg-foreground/90 transition-colors disabled:opacity-60"
         >
-          <Download className="h-3.5 w-3.5" />
-          Descargar
-        </a>
+          {isDownloading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Download className="h-3.5 w-3.5" />
+          )}
+          {isDownloading ? "Descargando..." : "Descargar"}
+        </button>
 
         <Button
           variant="outline"

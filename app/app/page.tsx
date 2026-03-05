@@ -15,7 +15,6 @@ export default async function AppDashboard() {
       .split(" ")[0]
       .trim() || user?.email?.split("@")[0] || "ahí"
 
-  // Tres queries en paralelo: total, completadas, últimas 3 imágenes
   const [{ count: totalCount }, { count: completedCount }, { data: recent }] =
     await Promise.all([
       supabase
@@ -63,30 +62,30 @@ export default async function AppDashboard() {
 
       {/* Stats */}
       {hasGenerations && (
-        <div className="flex items-center gap-8 mb-10 pb-10 border-b border-border">
+        <div className="flex items-start gap-10 mb-12 pb-10 border-b border-border">
           <div>
-            <p className="font-serif italic text-3xl font-bold text-foreground">
+            <p className="font-serif italic text-5xl font-bold text-foreground leading-none">
               {totalCount}
             </p>
-            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mt-0.5">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-2">
               {totalCount === 1 ? "Generación" : "Generaciones"}
             </p>
           </div>
-          <div className="w-px h-10 bg-border" />
+          <div className="w-px h-14 bg-border/60 mt-1" />
           <div>
-            <p className="font-serif italic text-3xl font-bold text-foreground">
+            <p className="font-serif italic text-5xl font-bold text-foreground leading-none">
               {completedCount}
             </p>
-            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mt-0.5">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-2">
               Completadas
             </p>
           </div>
-          <div className="w-px h-10 bg-border" />
+          <div className="w-px h-14 bg-border/60 mt-1" />
           <div>
-            <p className="font-serif italic text-3xl font-bold text-foreground">
+            <p className="font-serif italic text-5xl font-bold text-foreground leading-none">
               6
             </p>
-            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground mt-0.5">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mt-2">
               Estilos
             </p>
           </div>
@@ -107,7 +106,7 @@ export default async function AppDashboard() {
               Ver todo →
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {recent.map((gen) => {
               const styleName =
                 STYLES.find((s) => s.id === gen.style)?.name ??
@@ -127,15 +126,42 @@ export default async function AppDashboard() {
                       className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                       sizes="(max-width: 768px) 33vw, 25vw"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors" />
+                    {/* Gradient overlay — style name en hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-1 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <p className="font-serif italic text-sm font-semibold text-white leading-tight">
+                        {styleName}
+                      </p>
+                    </div>
                   </div>
-                  <p className="font-serif italic text-sm font-semibold text-foreground mt-2 leading-tight">
-                    {styleName}
-                  </p>
                 </Link>
               )
             })}
           </div>
+        </div>
+      )}
+
+      {/* CTA card — rellena el espacio vacío */}
+      {hasRecent && (
+        <div className="mt-12 border border-border/60 p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div>
+            <span className="text-xs uppercase tracking-[0.2em] text-warm mb-2 block">
+              Sigue creando
+            </span>
+            <p className="font-serif italic text-2xl font-bold text-foreground">
+              ¿Qué habitación transformamos hoy?
+            </p>
+            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+              Cada espacio esconde un nuevo diseño esperando ser descubierto.
+            </p>
+          </div>
+          <Link
+            href="/app/generate"
+            className="shrink-0 inline-flex items-center gap-2 h-11 px-8 bg-foreground text-background text-xs uppercase tracking-wide hover:bg-foreground/90 transition-colors"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            Nueva generación
+          </Link>
         </div>
       )}
 

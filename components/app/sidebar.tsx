@@ -31,10 +31,10 @@ export function Sidebar({ email, signOutAction }: SidebarProps) {
       href={href}
       onClick={() => setMobileOpen(false)}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 text-sm transition-colors border-l-2",
+        "flex items-center gap-3 px-4 py-3 text-sm transition-colors",
         isActive(href, exact)
-          ? "border-foreground text-foreground bg-muted/50 font-medium"
-          : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted",
+          ? "bg-warm/10 text-foreground font-medium"
+          : "text-muted-foreground hover:text-foreground hover:bg-warm/5",
       )}
     >
       <Icon className="h-4 w-4 shrink-0" />
@@ -47,10 +47,11 @@ export function Sidebar({ email, signOutAction }: SidebarProps) {
       <div className="px-6 py-5 border-b border-border flex items-center justify-between">
         <Link
           href="/"
-          className="font-serif italic text-xl font-bold tracking-tight"
+          className="font-serif italic text-xl font-bold tracking-tight flex items-center gap-1.5"
           onClick={() => setMobileOpen(false)}
         >
           Décoriai
+          <span className="text-warm font-normal not-italic text-lg select-none" aria-hidden="true">·</span>
         </Link>
         {showClose && (
           <button
@@ -65,13 +66,20 @@ export function Sidebar({ email, signOutAction }: SidebarProps) {
 
       <nav className="flex-1 p-3 space-y-0.5">{navLinks}</nav>
 
-      <div className="p-3 border-t border-border space-y-1">
-        <p className="px-3 py-1 text-xs text-muted-foreground truncate">{email}</p>
+      <div className="p-4 border-t border-border">
+        <div className="flex items-center gap-3 mb-3 px-1">
+          <div className="h-8 w-8 rounded-full bg-warm/20 flex items-center justify-center shrink-0">
+            <span className="text-xs font-semibold text-warm uppercase">
+              {email[0] ?? "U"}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground truncate">{email}</p>
+        </div>
         <form action={signOutAction}>
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive rounded-none"
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive rounded-none px-1"
             type="submit"
           >
             <LogOut className="h-4 w-4" />
@@ -84,18 +92,19 @@ export function Sidebar({ email, signOutAction }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop sidebar — estático en el flujo flex */}
-      <aside className="hidden md:flex w-60 shrink-0 border-r border-border flex-col bg-white sticky top-0 h-screen">
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-60 shrink-0 border-r border-border flex-col bg-background sticky top-0 h-screen">
         {sidebarContent(false)}
       </aside>
 
       {/* Mobile top bar */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-white border-b border-border flex items-center justify-between px-4">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-14 bg-background border-b border-border flex items-center justify-between px-4">
         <Link
           href="/app"
-          className="font-serif italic text-lg font-bold tracking-tight"
+          className="font-serif italic text-lg font-bold tracking-tight flex items-center gap-1.5"
         >
           Décoriai
+          <span className="text-warm font-normal not-italic text-base select-none" aria-hidden="true">·</span>
         </Link>
         <button
           onClick={() => setMobileOpen(true)}
@@ -113,7 +122,7 @@ export function Sidebar({ email, signOutAction }: SidebarProps) {
             className="md:hidden fixed inset-0 z-50 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="md:hidden fixed top-0 left-0 h-screen w-72 z-50 flex flex-col bg-white border-r border-border">
+          <aside className="md:hidden fixed top-0 left-0 h-screen w-72 z-50 flex flex-col bg-background border-r border-border">
             {sidebarContent(true)}
           </aside>
         </>
