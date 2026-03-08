@@ -77,7 +77,7 @@ export function Navbar() {
               <button
                 onClick={handleEnter}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-none px-5 h-9 text-xs tracking-wide uppercase transition-colors animate-in fade-in duration-500",
+                  "inline-flex items-center gap-2 rounded-md px-5 h-9 text-xs tracking-wide uppercase transition-colors animate-in fade-in duration-500",
                   scrolled
                     ? "bg-foreground text-background hover:bg-foreground/90"
                     : "bg-white text-foreground hover:bg-white/90",
